@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import {
   ShoppingBag,
@@ -23,7 +23,7 @@ function ProductPage() {
     try {
       setLoading(true);
       setError('');
-      const res = await axios.get('http://localhost:3001/api/products');
+      const res = await api.get('/products');
       setProducts(res.data);
     } catch (err) {
       console.error('Error fetching products:', err);

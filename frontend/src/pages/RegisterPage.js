@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Auth.css'; // Import CSS Auth
 
@@ -31,7 +31,7 @@ function RegisterPage() {
     }
 
     try {
-      await axios.post('http://localhost:3001/api/register', { username, password });
+      await api.post('/register', { username, password });
       setMessage('✅ Registrasi berhasil! Mengalihkan ke login...');
 
       setTimeout(() => {

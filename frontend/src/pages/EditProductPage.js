@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import AdminNavbar from '../components/AdminNavbar';
 import {
   Edit,
@@ -43,7 +43,7 @@ function EditProductPage() {
     const fetchProduct = async () => {
       try {
         setDataLoading(true);
-        const res = await axios.get(`http://localhost:3001/api/products/${id}`);
+        const res = await api.get(`/products/${id}`);
         const p = res.data;
 
         if (!p) {
@@ -122,7 +122,7 @@ function EditProductPage() {
     }
 
     try {
-      await axios.put(`http://localhost:3001/api/products/${id}`, formData, {
+      await api.put(`/products/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round(

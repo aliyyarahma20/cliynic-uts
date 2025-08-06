@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import '../styles/Auth.css';
 
 function LoginPage() {
@@ -16,7 +16,7 @@ function LoginPage() {
     setMessage('');
 
     try {
-      const res = await axios.post('http://localhost:3001/api/login', { username, password });
+      const res = await api.post('/login', { username, password });
       const userData = res.data; // { id, username, role }
       localStorage.setItem('user', JSON.stringify(userData));
 

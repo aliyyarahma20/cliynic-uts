@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import {
   Package,
   ShoppingCart,
@@ -26,7 +26,7 @@ function ProductList() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:3001/api/products');
+        const res = await api.get('/products');
         setProduk(res.data);
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -57,7 +57,7 @@ function ProductList() {
     if (!window.confirm(`Yakin ingin menghapus produk "${nama}"?`)) return;
 
     try {
-      await axios.delete(`http://localhost:3001/api/products/${id}`);
+      await api.delete(`/products/${id}`);
       setProduk(produk.filter(item => item.id !== id));
       alert('Produk berhasil dihapus!');
     } catch (err) {

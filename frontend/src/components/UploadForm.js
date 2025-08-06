@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import {
   Upload,
   Tag,
@@ -87,7 +87,7 @@ function UploadForm() {
     }
 
     try {
-      const res = await axios.post('http://localhost:3001/api/products', formData, {
+      const res = await api.post('/products', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -1,35 +1,44 @@
 const db = require('../db');
 const s3 = require('../s3');
 
+const cdnDomain = "https://d2thf5qc7btvzh.cloudfront.net"; // GANTI SESUAI CDN
+
+// ✅ UPLOAD PRODUK BARU
 exports.uploadProduct = async (req, res) => {
   try {
-    const { nama_produk, harga, stok } = req.body; // tambahkan stok
+    const { nama_produk, harga, stok } = req.body;
     const file = req.file;
 
     if (!nama_produk || !harga || !stok || !file) {
       return res.status(400).json({ error: 'Semua data wajib diisi' });
     }
 
-    const s3Res = await s3.upload({
+    // Upload ke S3
+    const key = `produk/${Date.now()}_${file.originalname}`;
+    await s3.upload({
       Bucket: process.env.S3_BUCKET_NAME,
-      Key: `produk/${Date.now()}_${file.originalname}`,
+      Key: key,
       Body: file.buffer,
-      ContentType: file.mimetype
+      ContentType: file.mimetype,
     }).promise();
 
+    // URL pakai CDN
+    const fotoUrl = `${cdnDomain}/${key}`;
+
+    // Simpan ke DB
     await db.execute(
       'INSERT INTO products (nama_produk, harga, stok, foto_url) VALUES (?, ?, ?, ?)',
-      [nama_produk, harga, stok, s3Res.Location]
+      [nama_produk, harga, stok, fotoUrl]
     );
 
-    res.json({ message: 'Produk berhasil diupload', foto_url: s3Res.Location });
+    res.json({ message: 'Produk berhasil diupload', foto_url: fotoUrl });
   } catch (err) {
     console.error('❌ Error upload:', err);
     res.status(500).json({ error: 'Gagal upload produk' });
   }
 };
 
-// HAPUS PRODUK
+// ✅ HAPUS PRODUK
 exports.deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
@@ -51,13 +60,17 @@ exports.updateProduct = async (req, res) => {
   try {
     let fotoUrl;
     if (file) {
-      const s3Res = await s3.upload({
+      // Upload ke S3
+      const key = `produk/${Date.now()}_${file.originalname}`;
+      await s3.upload({
         Bucket: process.env.S3_BUCKET_NAME,
-        Key: `produk/${Date.now()}_${file.originalname}`,
+        Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
       }).promise();
-      fotoUrl = s3Res.Location;
+
+      // URL pakai CDN
+      fotoUrl = `${cdnDomain}/${key}`;
     }
 
     const query = fotoUrl
@@ -70,12 +83,12 @@ exports.updateProduct = async (req, res) => {
     await db.execute(query, params);
     res.json({ message: 'Produk berhasil diupdate' });
   } catch (err) {
+    console.error('❌ Error update:', err);
     res.status(500).json({ error: 'Gagal update produk' });
   }
 };
 
-
-
+// ✅ AMBIL SEMUA PRODUK
 exports.getAllProducts = async (req, res) => {
   try {
     const [rows] = await db.execute('SELECT * FROM products ORDER BY id DESC');
@@ -86,6 +99,7 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+// ✅ AMBIL PRODUK BY ID
 exports.getProductById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -93,6 +107,8 @@ exports.getProductById = async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ error: 'Produk tidak ditemukan' });
     res.json(rows[0]);
   } catch (err) {
+    console.error('❌ Error ambil produk by ID:', err);
     res.status(500).json({ error: 'Gagal ambil produk' });
   }
 };
+
