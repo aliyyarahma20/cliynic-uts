@@ -25,7 +25,7 @@ function AdminNavbar() {
       <div className="navbar-container">
         <Link to="/admin/products" className="navbar-brand">
           <Heart className="nav-icon" size={20} />
-          HealthStore
+          Cliynic
         </Link>
 
         {/* Desktop Navigation */}
