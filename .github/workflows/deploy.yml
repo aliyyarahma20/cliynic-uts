@@ -22,14 +22,14 @@ jobs:
     - name: Install & build frontend
       run: |
         cd frontend
-        npm install --legacy-peer-deps
+        npm ci  # Menggunakan npm ci untuk instalasi yang lebih cepat dan dapat diandalkan
         npm run build
 
     # ==== Install Backend Dependencies ====
     - name: Install backend dependencies
       run: |
         cd backend
-        npm install --legacy-peer-deps
+        npm ci  # Menggunakan npm ci untuk instalasi yang lebih cepat dan dapat diandalkan
 
     # ==== Deploy Frontend to EC2 ====
     - name: Deploy Frontend to EC2
@@ -64,4 +64,3 @@ jobs:
           sudo docker rm cc-backend || true
           sudo docker build -t cc-backend .
           sudo docker run -d --name cc-backend -p 3001:3001 cc-backend
-
