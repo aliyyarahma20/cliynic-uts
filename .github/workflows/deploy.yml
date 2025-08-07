@@ -26,44 +26,33 @@ jobs:
         cd backend
         npm ci
 
-    # ==== 4. Deploy Backend to EC2 ====
-    - name: Deploy Backend to EC2
+    # ==== 4. Copy Backend Code ke Frontend (Bastion) ====
+    - name: Copy Backend Code via Bastion
       uses: appleboy/scp-action@v0.1.4
       with:
-        host: ${{ secrets.EC2_BE_HOST }}
+        host: ${{ secrets.EC2_FE_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         source: "backend/*"
-        target: "/home/ubuntu/cc-cliynic/backend"
+        target: "/home/ubuntu/backend-temp"
 
-    # ==== 5. Restart Backend Docker ====
-    - name: Restart Backend Docker
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_BE_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /home/ubuntu/cc-cliynic/backend
-          sudo docker stop cc-backend || true
-          sudo docker rm cc-backend || true
-          sudo docker build -t cc-backend .
-          sudo docker run -d --name cc-backend -p 3001:3001 cc-backend
-
-    # ==== 6. Update & Build Frontend in EC2 (No SCP, langsung build di server) ====
-    - name: Build Frontend in EC2
+    # ==== 5. SSH ke Frontend lalu push ke Backend via private IP ====
+    - name: Deploy & Restart Backend via Bastion
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.EC2_FE_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          cd /home/ubuntu/cc-cliynic/frontend
-          git pull origin main
-          npm install --legacy-peer-deps
-          npm run build
-          sudo docker stop cc-frontend || true
-          sudo docker rm cc-frontend || true
-          sudo docker build -t cc-frontend .
-          sudo docker run -d --name cc-frontend -p 80:80 cc-frontend
+          # Copy ke backend private via scp
+          scp -i ~/.ssh/aws_pertama_saya.pem -o StrictHostKeyChecking=no -r /home/ubuntu/backend-temp/* ubuntu@${{ secrets.EC2_BE_HOST }}:/home/ubuntu/cc-cliynic/backend
+
+          # SSH ke backend untuk restart Docker
+          ssh -i ~/.ssh/aws_pertama_saya.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_BE_HOST }} << 'EOF'
+            cd /home/ubuntu/cc-cliynic/backend
+            sudo docker stop cc-backend || true
+            sudo docker rm cc-backend || true
+            sudo docker build -t cc-backend .
+            sudo docker run -d --name cc-backend -p 3001:3001 cc-backend
+          EOF
 
