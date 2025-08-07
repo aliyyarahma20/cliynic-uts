@@ -14,19 +14,19 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    # ==== 2. Setup Node.js (untuk linting/test kalau perlu) ====
+    # ==== 2. Setup Node.js (optional lint/test) ====
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20'
 
-    # ==== 3. Install backend dependencies (for lint/test only) ====
+    # ==== 3. Install backend dependencies (optional test) ====
     - name: Install backend dependencies
       run: |
         cd backend
         npm ci
 
-    # ==== 4. Copy Backend Code ke Frontend (Bastion) ====
+    # ==== 4. Copy Backend Code via Bastion ====
     - name: Copy Backend Code via Bastion
       uses: appleboy/scp-action@v0.1.4
       with:
@@ -36,7 +36,7 @@ jobs:
         source: "backend/*"
         target: "/home/ubuntu/backend-temp"
 
-    # ==== 5. SSH ke Frontend lalu push ke Backend via private IP ====
+    # ==== 5. Deploy & Restart Backend via Bastion ====
     - name: Deploy & Restart Backend via Bastion
       uses: appleboy/ssh-action@v0.1.10
       with:
@@ -44,10 +44,13 @@ jobs:
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Copy ke backend private via scp
+          # Copy backend-temp to backend EC2
           scp -i ~/.ssh/aws_pertama_saya.pem -o StrictHostKeyChecking=no -r /home/ubuntu/backend-temp/* ubuntu@${{ secrets.EC2_BE_HOST }}:/home/ubuntu/cc-cliynic/backend
 
-          # SSH ke backend untuk restart Docker
+          # Copy file .env specifically
+          scp -i ~/.ssh/aws_pertama_saya.pem -o StrictHostKeyChecking=no /home/ubuntu/backend-temp/.env ubuntu@${{ secrets.EC2_BE_HOST }}:/home/ubuntu/cc-cliynic/backend/.env
+
+          # SSH ke backend dan restart Docker
           ssh -i ~/.ssh/aws_pertama_saya.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_BE_HOST }} << 'EOF'
             cd /home/ubuntu/cc-cliynic/backend
             sudo docker stop cc-backend || true
