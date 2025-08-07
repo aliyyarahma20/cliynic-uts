@@ -10,7 +10,7 @@ Project ini dibuat dalam rangka memenuhi Ujian Tengah Semester (UTS) Mata Kuliah
 - Backend tidak memiliki IP publik (akses via bastion/frontend)
 - CI/CD backend via GitHub Actions → EC2 frontend → EC2 backend (private)
 - Integrasi AWS RDS, S3, CloudFront
-- Dockerisasi backend
+- Dockerisasi backend. Frontend tidak dijalankan menggunakan Docker karena sudah dijalankan secara langsung menggunakan Nginx di EC2 frontend, dengan konfigurasi langsung pada file nginx.conf. Deploy dilakukan melalui CI/CD GitHub Actions dan langsung serve hasil build React dari port 80.
 
 ## 👤 Role & Fitur
 
