@@ -59,3 +59,15 @@ jobs:
             sudo docker run -d --name cc-backend -p 3001:3001 cc-backend
           EOF
 
+    # ==== 6. Build & Deploy Frontend (tanpa Docker) ====
+    - name: Build & Deploy Frontend
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.EC2_FE_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /home/ubuntu/frontend
+          npm install
+          npm run build
+          sudo cp -r build/* /var/www/html/
