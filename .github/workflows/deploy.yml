@@ -10,32 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout repository
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    # Setup Node.js versi terbaru sesuai requirement (>=20)
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20'
 
-    # Disable strict engine check (untuk menghindari EBADENGINE)
-    - name: Disable strict engines
-      run: npm config set engine-strict false
-
     # ==== Build Frontend ====
-    - name: Install dependencies frontend
+    - name: Install & build frontend
       run: |
         cd frontend
-        npm ci || npm install
+        npm install --legacy-peer-deps
         npm run build
 
     # ==== Install Backend Dependencies ====
-    - name: Install dependencies backend
+    - name: Install backend dependencies
       run: |
         cd backend
-        npm ci || npm install
+        npm install --legacy-peer-deps
 
     # ==== Deploy Frontend to EC2 ====
     - name: Deploy Frontend to EC2
@@ -57,7 +51,7 @@ jobs:
         source: "backend/*"
         target: "/home/ubuntu/cc-cliynic/backend"
 
-    # ==== Restart Docker Backend ====
+    # ==== Restart Backend Docker ====
     - name: Restart Backend Docker
       uses: appleboy/ssh-action@v0.1.10
       with:
