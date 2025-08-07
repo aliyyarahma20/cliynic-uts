@@ -18,21 +18,8 @@ jobs:
       with:
         node-version: '20'
 
-    # ==== Build Frontend ====
-    - name: Install & build frontend
-      run: |
-        cd frontend
-        npm install --legacy-peer-deps
-        npm run build
-
-    # ==== Install Backend Dependencies ====
-    - name: Install backend dependencies
-      run: |
-        cd backend
-        npm install --legacy-peer-deps
-
-    # ==== Deploy Frontend to EC2 ====
-    - name: Deploy Frontend to EC2
+    # ==== Skip Build: Copy Frontend Build Folder yang Sudah Ada ====
+    - name: Deploy Frontend Build Folder
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.EC2_FE_HOST }}
@@ -40,6 +27,12 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         source: "frontend/build/*"
         target: "/home/ubuntu/cc-cliynic/frontend/build"
+
+    # ==== Install Backend Dependencies ====
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        npm install --legacy-peer-deps
 
     # ==== Deploy Backend to EC2 ====
     - name: Deploy Backend to EC2
