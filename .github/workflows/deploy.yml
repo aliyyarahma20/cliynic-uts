@@ -10,31 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # ==== 1. Checkout repo ====
     - name: Checkout repo
       uses: actions/checkout@v3
 
+    # ==== 2. Setup Node.js (untuk linting/test kalau perlu) ====
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20'
 
-    # ==== Skip Build: Copy Frontend Build Folder yang Sudah Ada ====
-    - name: Deploy Frontend Build Folder
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.EC2_FE_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        source: "frontend/build/*"
-        target: "/home/ubuntu/cc-cliynic/frontend/build"
-
-    # ==== Install Backend Dependencies ====
+    # ==== 3. Install backend dependencies (for lint/test only) ====
     - name: Install backend dependencies
       run: |
         cd backend
-        npm install --legacy-peer-deps
+        npm ci
 
-    # ==== Deploy Backend to EC2 ====
+    # ==== 4. Deploy Backend to EC2 ====
     - name: Deploy Backend to EC2
       uses: appleboy/scp-action@v0.1.4
       with:
@@ -44,7 +36,7 @@ jobs:
         source: "backend/*"
         target: "/home/ubuntu/cc-cliynic/backend"
 
-    # ==== Restart Backend Docker ====
+    # ==== 5. Restart Backend Docker ====
     - name: Restart Backend Docker
       uses: appleboy/ssh-action@v0.1.10
       with:
@@ -57,4 +49,21 @@ jobs:
           sudo docker rm cc-backend || true
           sudo docker build -t cc-backend .
           sudo docker run -d --name cc-backend -p 3001:3001 cc-backend
+
+    # ==== 6. Update & Build Frontend in EC2 (No SCP, langsung build di server) ====
+    - name: Build Frontend in EC2
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.EC2_FE_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /home/ubuntu/cc-cliynic/frontend
+          git pull origin main
+          npm install --legacy-peer-deps
+          npm run build
+          sudo docker stop cc-frontend || true
+          sudo docker rm cc-frontend || true
+          sudo docker build -t cc-frontend .
+          sudo docker run -d --name cc-frontend -p 80:80 cc-frontend
 
