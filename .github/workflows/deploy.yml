@@ -33,7 +33,7 @@ jobs:
         host: ${{ secrets.EC2_FE_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
-        source: "backend/*"
+        source: "backend/**"
         target: "/home/ubuntu/backend-temp"
 
     # ==== 5. Deploy & Restart Backend via Bastion ====
