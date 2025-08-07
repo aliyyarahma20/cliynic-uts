@@ -59,7 +59,18 @@ jobs:
             sudo docker run -d --name cc-backend -p 3001:3001 cc-backend
           EOF
 
-    # ==== 6. Build & Deploy Frontend (tanpa Docker) ====
+    # ==== 6. Copy Frontend Code via SCP ====
+    - name: Copy Frontend Code via SCP
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.EC2_FE_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "frontend/**"
+        target: "/home/ubuntu/frontend"
+
+  
+    # ==== 7. Build & Deploy Frontend ====
     - name: Build & Deploy Frontend
       uses: appleboy/ssh-action@v0.1.10
       with:
