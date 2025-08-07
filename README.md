@@ -10,7 +10,7 @@ Project ini dibuat dalam rangka memenuhi Ujian Tengah Semester (UTS) Mata Kuliah
 - Backend tidak memiliki IP publik (akses via bastion/frontend)
 - CI/CD backend via GitHub Actions → EC2 frontend → EC2 backend (private)
 - Integrasi AWS RDS, S3, CloudFront
-- Dockerisasi backend. Frontend tidak dijalankan menggunakan Docker karena sudah dijalankan secara langsung menggunakan Nginx di EC2 frontend, dengan konfigurasi langsung pada file nginx.conf. Deploy dilakukan melalui CI/CD GitHub Actions dan langsung serve hasil build React dari port 80.
+- Dockerisasi backend. Frontend tidak dijalankan menggunakan Docker karena sudah dideploy langsung di EC2 frontend menggunakan Nginx, dengan konfigurasi yang telah disesuaikan melalui file nginx.conf. Deploy dilakukan via CI/CD dan hasil build React disajikan melalui port 80.
 
 ## 👤 Role & Fitur
 
@@ -58,19 +58,19 @@ cliynic-uts/
 | **Storage**   | Amazon S3 + CloudFront                                                 |
 | **CI/CD**     | GitHub Actions                                                         |
 | **Infrastructure** | 2 EC2 instances (FE & BE), VPC, private IP communication        |
-| **Container** | Docker                                                                 |
+| **Containerisasi** | Docker (backend)                                                                 |
 
 ## 🔄 Alur CI/CD Backend
 
 1. **Developer push** ke branch `main`
 2. **GitHub Actions** berjalan:
-   - Kirim folder backend via SCP ke EC2 frontend (bastion)
-   - Dari EC2 frontend, dikirim ke EC2 backend (private) via SCP
+   - Mengirim folder backend ke EC2 frontend (sebagai bastion) via SCP
+   - Dari EC2 frontend, folder backend diteruskan ke EC2 backend via private IP (SCP)
    - Di EC2 backend:
      - Stop & remove container lama
      - Docker build image backend terbaru
-     - Jalankan ulang container dengan port 3001
-     - Salin file `.env` ke container baru
+     - Jalankan ulang container backend dengan port 3001
+     - Salin file `.env` ke dalam container baru
 
 ## ✅ Status Fungsional
 
@@ -80,7 +80,7 @@ cliynic-uts/
 - [x] Frontend terhubung dengan backend
 - [x] Admin bisa CRUD produk
 - [x] User bisa melihat produk (read-only)
-- [x] Semua service jalan via Docker
+- [x] Backend berjalan melalui Docker
 
 ## 🔐 Keamanan & Akses
 
