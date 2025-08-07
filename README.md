@@ -90,6 +90,10 @@ cliynic-uts/
 
 ---
 
+## 📊 Kesimpulan
+Proyek CLIYNIC berhasil mengimplementasikan arsitektur cloud computing yang komprehensif dengan mengintegrasikan berbagai layanan AWS dan praktik DevOps modern. Aplikasi ini mendemonstrasikan penerapan microservice architecture dengan frontend di public subnet dan backend di private subnet untuk keamanan optimal.
+Implementasi CI/CD melalui GitHub Actions memungkinkan otomatisasi deployment yang efisien, sementara penggunaan Docker memastikan konsistensi environment aplikasi. Integrasi CloudFront sebagai CDN meningkatkan performa loading gambar, dan konfigurasi VPC dengan security groups yang tepat menjamin keamanan komunikasi antar layanan.
+
 ## 💻 Developer
 
 **Aliyya Rahmawati Putri**  
