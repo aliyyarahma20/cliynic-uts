@@ -69,8 +69,8 @@ jobs:
         source: "./frontend"         # kirim folder utuh
         target: "/home/ubuntu/"
 
-   # ==== 7. Build & Deploy Frontend as Docker ====
-    - name: Build & Deploy Frontend 
+    # ==== 7. Build & Deploy Frontend as Docker ====
+    - name: Build & Deploy Frontend
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.EC2_FE_HOST }}
