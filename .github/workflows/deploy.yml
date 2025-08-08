@@ -69,8 +69,8 @@ jobs:
         source: "./frontend"         # kirim folder utuh
         target: "/home/ubuntu/"
 
-    # ==== 7. Build & Deploy Frontend ====
-    - name: Build & Deploy Frontend
+   # ==== 7. Build & Deploy Frontend as Docker ====
+    - name: Build & Deploy Frontend 
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.EC2_FE_HOST }}
@@ -78,9 +78,9 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd /home/ubuntu/frontend
-          export VITE_API_URL="http://10.0.2.93:3001"
-          npm install
-          npm run build
-          sudo rm -rf /var/www/html/*
-          sudo cp -r build/* /var/www/html/
+          echo "VITE_API_URL=http://3.27.47.115:3001/api" > .env
+          sudo docker stop cc-frontend || true
+          sudo docker rm cc-frontend || true
+          sudo docker build -t cc-frontend .
+          sudo docker run -d --name cc-frontend -p 80:80 cc-frontend
 
